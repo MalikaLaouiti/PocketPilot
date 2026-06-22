@@ -14,7 +14,7 @@ public class Client {
     @Id
     @Column(name = "idclient")
     @GeneratedValue
-    private UUID idclient;
+    private UUID idClient;
 
     @Column(unique = true, length = 8)
     private String cin;

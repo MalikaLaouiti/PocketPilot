@@ -22,7 +22,7 @@ public class CompteService {
     }
 
     public CompteBancaire getCompteByClientId(UUID idClient) {
-        return compteRepository.findByClient_IdClient(idClient); 
+        return compteRepository.findByClient_IdClient(idClient);
     }
 
     public CompteBancaire createCompte(CompteBancaire compte) {
