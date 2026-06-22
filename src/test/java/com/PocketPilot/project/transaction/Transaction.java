@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.PocketPilot.project.comptebancaire.CompteBancaire;
+
 
 @Entity
 @Table(name = "transaction")
@@ -17,8 +19,9 @@ public class Transaction {
     @Column(name = "idtransaction")
     private UUID idTransaction;
 
-    @Column(name = "idcompte")
-    private UUID idCompte;
+    @ManyToOne
+    @JoinColumn(name = "idcompte")
+    private CompteBancaire compte;
 
     @Column(length = 30)
     private String reference;

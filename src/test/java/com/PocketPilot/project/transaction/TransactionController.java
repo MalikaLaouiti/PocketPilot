@@ -23,6 +23,11 @@ public class TransactionController {
         return transactionService.getTransactionById(id);
     }
 
+    @GetMapping("/byCompte/{idcompte}")
+    public List<Transaction> getTransactionsByCompte(@PathVariable("idcompte") UUID idCompte) {
+        return transactionService.getTransactionsByCompte(idCompte);
+    }
+
     @PostMapping
     public Transaction createTransaction(@RequestBody Transaction transaction) {
         return transactionService.createTransaction(transaction);

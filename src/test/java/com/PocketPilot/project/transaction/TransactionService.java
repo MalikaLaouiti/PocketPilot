@@ -21,11 +21,16 @@ public class TransactionService {
                 .orElseThrow();
     }
 
+    
     public Transaction createTransaction(Transaction transaction) {
         return transactionRepository.save(transaction);
     }
 
     public void deleteTransaction(UUID id) {
         transactionRepository.deleteById(id);
+    }
+
+    public List<Transaction> getTransactionsByCompte(UUID idCompte) {
+        return transactionRepository.findByCompte_IdCompte(idCompte);
     }
 }
