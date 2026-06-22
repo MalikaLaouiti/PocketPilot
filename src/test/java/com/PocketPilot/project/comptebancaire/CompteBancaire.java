@@ -3,11 +3,11 @@ package com.PocketPilot.project.comptebancaire;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.UUID;
+
+import com.PocketPilot.project.client.Client;
 
 
 @Entity
@@ -19,8 +19,9 @@ public class CompteBancaire {
     @Column(name = "idcompte")
     private UUID idCompte;
 
-    @Column(name = "idclient")
-    private UUID idClient;
+    @OneToOne
+    @JoinColumn(name = "idclient")
+    private Client client;
 
     @Column(length = 20, unique = true)
     private String rib;

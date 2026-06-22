@@ -23,6 +23,11 @@ public class CompteController {
         return compteService.getCompteById(id);
     }
 
+    @GetMapping("/byClient/{idclient}")
+    public CompteBancaire getCompteByClientId(@PathVariable("idclient") UUID idClient) {
+        return compteService.getCompteByClientId(idClient);
+    }
+
     @PostMapping
     public CompteBancaire createCompte(@RequestBody CompteBancaire compte) {
         return compteService.createCompte(compte);

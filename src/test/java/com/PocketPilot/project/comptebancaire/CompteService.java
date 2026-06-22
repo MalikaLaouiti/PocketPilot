@@ -21,6 +21,10 @@ public class CompteService {
                 .orElseThrow();
     }
 
+    public CompteBancaire getCompteByClientId(UUID idClient) {
+        return compteRepository.findByClient_IdClient(idClient); 
+    }
+
     public CompteBancaire createCompte(CompteBancaire compte) {
         return compteRepository.save(compte);
     }
