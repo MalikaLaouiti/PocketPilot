@@ -15,14 +15,29 @@ public class AnalyseController {
     public AnalyseController(AnalyseService analyseService) {
         this.analyseService = analyseService;
     }
-
+    
     @GetMapping("/monthly")
     public List<Transaction> getMonthlyTransactions(
-            @RequestParam(name = "idCompte") UUID idCompte,
-            @RequestParam(name = "year") int year,
-            @RequestParam(name = "month") int month
-    ) {
+            @RequestParam UUID idCompte,
+            @RequestParam int year,
+            @RequestParam int month) {
         return analyseService.afficherTransactions(idCompte, YearMonth.of(year, month));
+    }
+
+    @PostMapping("/generate")
+    public AnalyseMensuelle generateAnalyse(
+            @RequestParam UUID idCompte,
+            @RequestParam int year,
+            @RequestParam int month) {
+        return analyseService.genererAnalyse(idCompte, YearMonth.of(year, month));
+    }
+
+    @GetMapping("/result")
+    public AnalyseMensuelle getAnalyse(
+            @RequestParam UUID idCompte,
+            @RequestParam int year,
+            @RequestParam int month) {
+        return analyseService.getAnalyse(idCompte, YearMonth.of(year, month));
     }
 
 }
