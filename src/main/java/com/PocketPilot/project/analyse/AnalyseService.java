@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -28,7 +29,7 @@ public class AnalyseService {
                 this.transactionRepository = transactionRepository;
                 this.compteRepository = compteRepository;
         }
-        
+
         public List<AnalyseMensuelle> getAllAnalyses() {
                 return analyseRepository.findAll();
         }
@@ -36,6 +37,7 @@ public class AnalyseService {
         public void deleteAnalyse(UUID id) {
                 analyseRepository.deleteById(id);
         }
+
         // ── Récupérer les transactions brutes
         public List<Transaction> afficherTransactions(UUID idCompte, YearMonth mois) {
                 LocalDateTime start = mois.atDay(1).atStartOfDay();
@@ -47,6 +49,13 @@ public class AnalyseService {
         // ──Générer et persister l'analyse mensuelle
         public AnalyseMensuelle genererAnalyse(UUID idCompte, YearMonth mois) {
 
+                // Vérification AVANT de calculer 
+                Optional<AnalyseMensuelle> existante = analyseRepository
+                        .findByCompte_IdCompteAndMoisAndAnnee(idCompte, mois.getMonthValue(), mois.getYear());
+
+                if (existante.isPresent()) {
+                        return existante.get(); // retourne l'existante, pas d'erreur
+                }
                 List<Transaction> transactions = afficherTransactions(idCompte, mois);
 
                 CompteBancaire compte = compteRepository.findById(idCompte)
@@ -91,7 +100,7 @@ public class AnalyseService {
                 return analyseRepository.save(analyse);
         }
 
-        // ──Générer l'analyse pour TOUS les comptes 
+        // ──Générer l'analyse pour TOUS les comptes
         public List<AnalyseMensuelle> genererAnalyseTousLesComptes(YearMonth mois) {
 
                 List<CompteBancaire> comptes = compteRepository.findAll();
@@ -130,7 +139,5 @@ public class AnalyseService {
         public List<AnalyseMensuelle> getAnalyseByCompte(UUID idCompte) {
                 return analyseRepository.findByCompte_IdCompte(idCompte);
         }
-
-       
 
 }

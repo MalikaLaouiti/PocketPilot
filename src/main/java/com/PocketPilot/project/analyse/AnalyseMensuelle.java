@@ -11,7 +11,14 @@ import lombok.Data;
 
 
 @Entity 
-@Table(name = "analysemensuelle")
+@Table(name = "analysemensuelle",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_analyse_compte_mois_annee",
+            columnNames = {"idcompte", "mois", "annee"}  //no analyse for the same person and the same month and year=>no duplication
+        )
+    }
+)
 @Data
 public class AnalyseMensuelle {
     @Id
