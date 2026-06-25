@@ -11,11 +11,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import com.PocketPilot.project.comptebancaire.CompteBancaire;
-import com.PocketPilot.project.comptebancaire.CompteRepository;
-import com.PocketPilot.project.transaction.Transaction;
-import com.PocketPilot.project.transaction.TransactionRepository;
+import com.PocketPilot.project.comptebancaire.*;
+import com.PocketPilot.project.transaction.*;
 
 @Service
 public class AnalyseService {
@@ -122,13 +119,9 @@ public class AnalyseService {
                 genererAnalyseBatch(moisPrecedent);
         }
 
-        // ──Récupérer une analyse existante
-        public AnalyseMensuelle getAnalyse(UUID idCompte, YearMonth mois) {
-                return analyseRepository
-                                .findByCompte_IdCompteAndMoisAndAnnee(
-                                                idCompte,
-                                                mois.getMonthValue(),
-                                                mois.getYear())
-                                .orElseGet(() -> genererAnalyse(idCompte, mois)); 
+        // ──Récupérer une analyse existante pour un compte
+        public List<AnalyseMensuelle> getAnalyseByCompte(UUID idCompte) {
+                return analyseRepository.findByCompte_IdCompte(idCompte);
         }
+
 }

@@ -49,11 +49,8 @@ public class AnalyseController {
     }
 
     @GetMapping("/resultat")
-    public AnalyseMensuelle getAnalyse(
-            @RequestParam UUID idCompte,
-            @RequestParam int year,
-            @RequestParam int month) {
-        return analyseService.getAnalyse(idCompte, YearMonth.of(year, month));
+    public List<AnalyseMensuelle> getAnalyseByCompte(@RequestParam(name="idCompte") UUID idCompte) {
+        return analyseService.getAnalyseByCompte(idCompte);
     }
 
 }
