@@ -28,7 +28,14 @@ public class AnalyseService {
                 this.transactionRepository = transactionRepository;
                 this.compteRepository = compteRepository;
         }
+        
+        public List<AnalyseMensuelle> getAllAnalyses() {
+                return analyseRepository.findAll();
+        }
 
+        public void deleteAnalyse(UUID id) {
+                analyseRepository.deleteById(id);
+        }
         // ── Récupérer les transactions brutes
         public List<Transaction> afficherTransactions(UUID idCompte, YearMonth mois) {
                 LocalDateTime start = mois.atDay(1).atStartOfDay();
@@ -123,5 +130,7 @@ public class AnalyseService {
         public List<AnalyseMensuelle> getAnalyseByCompte(UUID idCompte) {
                 return analyseRepository.findByCompte_IdCompte(idCompte);
         }
+
+       
 
 }

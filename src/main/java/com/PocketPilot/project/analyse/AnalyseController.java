@@ -1,5 +1,6 @@
 package com.PocketPilot.project.analyse;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.PocketPilot.project.transaction.Transaction;
 
@@ -48,9 +49,21 @@ public class AnalyseController {
         return analyseService.genererAnalyseBatch(YearMonth.of(year, month));
     }
 
-    @GetMapping("/resultat")
+    @GetMapping("/byCompte")
     public List<AnalyseMensuelle> getAnalyseByCompte(@RequestParam(name="idCompte") UUID idCompte) {
         return analyseService.getAnalyseByCompte(idCompte);
     }
+
+    @GetMapping("/all")
+    public List<AnalyseMensuelle> getAllAnalyse() {
+        return analyseService.getAllAnalyses();
+    }
+
+    @DeleteMapping("/{idanalyse}")
+    public ResponseEntity<Void> deleteAnalyse(@PathVariable("idanalyse") UUID id) {
+        analyseService.deleteAnalyse(id);
+        return ResponseEntity.noContent().build();
+    }
+
 
 }
