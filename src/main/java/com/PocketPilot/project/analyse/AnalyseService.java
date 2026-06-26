@@ -140,4 +140,9 @@ public class AnalyseService {
                 return analyseRepository.findByCompte_IdCompte(idCompte);
         }
 
+        public List<AnalyseMensuelle> getDernieresAnalyses(UUID idCompte) {
+        return analyseRepository
+                .findTop3ByCompte_IdCompteOrderByAnneeDescMoisDesc(idCompte);
+        }
+
 }
