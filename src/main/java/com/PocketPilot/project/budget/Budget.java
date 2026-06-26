@@ -50,11 +50,7 @@ public class Budget {
     @Column(nullable = false)
     private StatutBudget statut;
 
-    @OneToMany(
-            mappedBy = "budget",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "budget",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<LigneBudget> lignesBudget = new ArrayList<>();
 }
 
