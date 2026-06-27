@@ -1,12 +1,12 @@
 package com.PocketPilot.project.ligneBudget;
 
 public enum CategorieDepense {
-    ALIMENTATION,
+    AUTRE,
     TRANSPORT,
-    LOGEMENT,
-    SANTE,
-    LOISIRS,
-    EPARGNE,
-    FACTURES,
-    AUTRE
+    ALIMENTATION,
+    FACTURE,
+    LOISIR,
+    SALAIRE,
+    SHOPPING,
+    SANTE
 }

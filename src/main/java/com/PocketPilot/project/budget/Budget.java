@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import com.PocketPilot.project.comptebancaire.CompteBancaire;
 import com.PocketPilot.project.ligneBudget.LigneBudget;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "budget")
@@ -51,11 +52,12 @@ public class Budget {
     private StatutBudget statut;
 
     @OneToMany(mappedBy = "budget",cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonManagedReference
     private List<LigneBudget> lignesBudget = new ArrayList<>();
 }
 
 enum StatutBudget {
-    GENERE,    // vient d'être généré
-    CONSULTE,  // client l'a consulté
-    EXPIRE     // mois passé
+    GENERE,    
+    CONSULTE,  
+    EXPIRE     
 }

@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import com.PocketPilot.project.budget.Budget;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "ligne_budget")
@@ -14,7 +15,7 @@ import com.PocketPilot.project.budget.Budget;
 public class LigneBudget {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "idligne")
     private UUID idLigne;
 
@@ -28,14 +29,15 @@ public class LigneBudget {
     @Column(precision = 15, scale = 3)
     private BigDecimal montantDepense;
 
-    private Double pourcentageSalaire;
+    private BigDecimal  pourcentageSalaire;
 
-    private Double pourcentageDepense;
+    private BigDecimal  pourcentageDepense;
 
-    private Double alerteSeuil;
+    private BigDecimal  alerteSeuil;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idbudget", nullable = false)
+    @JsonBackReference   
     private Budget budget;
 }
 
