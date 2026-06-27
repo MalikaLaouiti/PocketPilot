@@ -1,6 +1,7 @@
 package com.PocketPilot.project.budget;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -14,8 +15,12 @@ import com.PocketPilot.project.ligneBudget.LigneBudget;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
-@Table(name = "budget")
+@Table(
+    name = "budget",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"mois", "annee"})
+)
 @Data
+@Builder
 public class Budget {
 
     @Id
@@ -33,19 +38,20 @@ public class Budget {
     @Column(nullable = false)
     private Integer annee;
 
-    @Column(nullable = false, precision = 15, scale = 3)
-    private BigDecimal revenuMensuel;
+    @Column(precision = 15, scale = 3)
+    private BigDecimal revenuPrevu;
 
     @Column(precision = 15, scale = 3)
-    private BigDecimal depenseTotale;
+    private BigDecimal depensePrevue;
 
     @Column(precision = 15, scale = 3)
-    private BigDecimal epargneReelle;
+    private BigDecimal epargnePrevue;
 
-    private Double tauxDepense;
+    @Column(precision = 15, scale = 3)
+    private BigDecimal tauxDepense;
 
     @Column(nullable = false)
-    private LocalDateTime dateCreation;
+    private LocalDateTime dateGeneration;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -53,11 +59,36 @@ public class Budget {
 
     @OneToMany(mappedBy = "budget",cascade = CascadeType.ALL,orphanRemoval = true)
     @JsonManagedReference
+    @Builder.Default
     private List<LigneBudget> lignesBudget = new ArrayList<>();
+
+    public void addLigne(LigneBudget ligne) {
+        ligne.setBudget(this);
+        this.lignesBudget.add(ligne);
+    }
+
+    public void recalculerTotaux() {
+        this.depensePrevue = lignesBudget.stream()
+                .map(LigneBudget::getMontantPrevu)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+ 
+        this.epargnePrevue = (revenuPrevu != null)
+                ? revenuPrevu.subtract(depensePrevue)
+                : BigDecimal.ZERO;
+ 
+        if (revenuPrevu != null && revenuPrevu.compareTo(BigDecimal.ZERO) > 0) {
+            this.tauxDepense = depensePrevue
+                    .divide(revenuPrevu, 4, java.math.RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100));
+        } else {
+            this.tauxDepense = BigDecimal.ZERO;
+        }
+    }
 }
 
 enum StatutBudget {
-    GENERE,    
-    CONSULTE,  
-    EXPIRE     
-}
+    PREVU,
+    VALIDE,
+    EN_COURS,
+    CLOTURE
+}    

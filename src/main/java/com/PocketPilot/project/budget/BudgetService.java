@@ -1,5 +1,15 @@
 package com.PocketPilot.project.budget;
 
+import com.PocketPilot.project.analyse.AnalyseMensuelle;
+import com.PocketPilot.project.analyse.AnalyseRepository;
+import com.PocketPilot.project.ligneBudget.*;
+import com.PocketPilot.project.transaction.Transaction;
+import com.PocketPilot.project.transaction.TransactionRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -7,182 +17,189 @@ import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Service;
-
-import com.PocketPilot.project.analyse.*;
-import com.PocketPilot.project.comptebancaire.*;
-import com.PocketPilot.project.ligneBudget.CategorieDepense;
-import com.PocketPilot.project.ligneBudget.LigneBudget;
-import com.PocketPilot.project.transaction.*;
-
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class BudgetService {
 
-        private final BudgetRepository budgetRepository;
-        private final AnalyseRepository analyseRepository;
-        private final TransactionRepository transactionRepository;
+    /**
+     * Poids de pondération par ancienneté (index 0 = mois le plus récent).
+     * N-1 : 50 %  |  N-2 : 33 %  |  N-3 : 17 %
+     */
+    private static final double[] POIDS = {0.50, 0.33, 0.17};
 
-        public BudgetService(BudgetRepository budgetRepository,
-                        AnalyseRepository analyseRepository,
-                        TransactionRepository transactionRepository,
-                        CompteRepository compteRepository) {
-                this.budgetRepository = budgetRepository;
-                this.analyseRepository = analyseRepository;
-                this.transactionRepository = transactionRepository;
+    private final BudgetRepository      budgetRepository;
+    private final LigneRepository ligneBudgetRepository;
+    private final AnalyseRepository     analyseRepository;
+    private final TransactionRepository transactionRepository;
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Génération du budget prévisionnel
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @Transactional
+    public Budget genererBudgetMoisSuivant(UUID idCompte) {
+
+        // Charger les 3 dernières analyses en premier
+        List<AnalyseMensuelle> analyses = analyseRepository
+                .findTop3ByCompte_IdCompteOrderByAnneeDescMoisDesc(idCompte);
+
+        if (analyses.isEmpty()) {
+            throw new IllegalStateException(
+                    "Impossible de générer un budget : aucune analyse disponible pour le compte " + idCompte);
         }
 
-        // ── Générer le budget M+1 depuis les 3 dernières analyses ────────────────
-        public Budget genererBudget(UUID idCompte) {
+        // FIX 1 — mois cible = mois suivant le plus récent mois analysé (pas YearMonth.now())
+        AnalyseMensuelle analyseRecente = analyses.get(0);
+        YearMonth moisCible = YearMonth.of(analyseRecente.getAnnee(), analyseRecente.getMois()).plusMonths(1);
+        int mois  = moisCible.getMonthValue();
+        int annee = moisCible.getYear();
 
-                // 1. Récupérer les 3 dernières analyses
-                List<AnalyseMensuelle> fenetre = analyseRepository
-                                .findTop3ByCompte_IdCompteOrderByAnneeDescMoisDesc(idCompte);
-
-                if (fenetre.size() < 3) {
-                        throw new RuntimeException("Minimum 3 analyses mensuelles requises");
-                }
-
-                // 2. Déterminer le mois cible (M+1 après la plus récente)
-                AnalyseMensuelle plusRecente = fenetre.get(0);
-                YearMonth moisCible = YearMonth.of(plusRecente.getAnnee(), plusRecente.getMois())
-                                .plusMonths(1);
-
-                // 3. Anti-doublon
-                return budgetRepository
-                                .findByCompte_IdCompteAndMoisAndAnnee(
-                                                idCompte, moisCible.getMonthValue(), moisCible.getYear())
-                                .orElseGet(() -> construireEtPersisterBudget(idCompte, fenetre, moisCible));
-                // ↑ Modification 1 : on utilise orElseGet() au lieu de deux appels séparés
-                // existsBy... + findBy... — évite une requête SQL redondante.
+        // Budget déjà existant → on le retourne sans écraser
+        Optional<Budget> existant = budgetRepository
+                .findByCompte_IdCompteAndMoisAndAnnee(idCompte, mois, annee);
+        if (existant.isPresent()) {
+            log.info("[Budget] Compte={} — budget {}/{} déjà existant, retour sans modification.",
+                    idCompte, mois, annee);
+            return existant.get();
         }
 
-        private Budget construireEtPersisterBudget(UUID idCompte, List<AnalyseMensuelle> fenetre,  YearMonth moisCible) {
+        BigDecimal revenuPrevu = calculerRevenuPrevu(analyses);
+        List<LigneBudget> lignes = calculerLignes(idCompte, analyses, revenuPrevu);
 
-                CompteBancaire compte = fenetre.get(0).getCompte();
+        // FIX 2 — compte récupéré depuis l'analyse (déjà chargé, jamais null)
+        Budget budget = Budget.builder()
+                .compte(analyseRecente.getCompte())
+                .mois(mois)
+                .annee(annee)
+                .revenuPrevu(revenuPrevu)
+                .statut(StatutBudget.PREVU)
+                .dateGeneration(LocalDateTime.now())
+                .build();
 
-                BigDecimal revenuMensuel = calculerRevenuMoyen(fenetre);
+        lignes.forEach(budget::addLigne);
+        budget.recalculerTotaux();
 
-                List<LigneBudget> lignes = genererLignes(idCompte, fenetre, revenuMensuel);
+        // FIX 3 — pourcentageDepense = part de chaque catégorie dans le total des dépenses prévues
+        // calculé ici après recalculerTotaux() pour avoir depensePrevue disponible
+        BigDecimal totalDepenses = budget.getDepensePrevue();
+        budget.getLignesBudget().forEach(l -> l.calculerPourcentageDepense(totalDepenses));
 
-                BigDecimal depenseTotale = lignes.stream()
-                                .map(LigneBudget::getMontantPrevu)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        Budget saved = budgetRepository.save(budget);
+        log.info("[Budget] Compte={} — budget {}/{} généré ({} lignes, revenu prévu={}).",
+                idCompte, mois, annee, lignes.size(), revenuPrevu);
+        return saved;
+    }
 
-                BigDecimal epargneReelle = revenuMensuel.subtract(depenseTotale);
+    // ─────────────────────────────────────────────────────────────────────────
+    // Lecture
+    // ─────────────────────────────────────────────────────────────────────────
 
-                double tauxDepense = revenuMensuel.compareTo(BigDecimal.ZERO) > 0
-                                ? depenseTotale.divide(revenuMensuel, 4, RoundingMode.HALF_UP).doubleValue()
-                                : 0.0;
+    @Transactional(readOnly = true)
+    public boolean existeBudgetMoisSuivant(UUID idCompte) {
+        List<AnalyseMensuelle> analyses = analyseRepository
+                .findTop3ByCompte_IdCompteOrderByAnneeDescMoisDesc(idCompte);
+        if (analyses.isEmpty()) return false;
+        AnalyseMensuelle recente = analyses.get(0);
+        YearMonth moisCible = YearMonth.of(recente.getAnnee(), recente.getMois()).plusMonths(1);
+        return budgetRepository.existsByCompte_IdCompteAndMoisAndAnnee(
+                idCompte, moisCible.getMonthValue(), moisCible.getYear());
+    }
 
-                Budget budget = new Budget();
-                budget.setCompte(compte);
-                budget.setMois(moisCible.getMonthValue());
-                budget.setAnnee(moisCible.getYear());
-                budget.setRevenuMensuel(revenuMensuel);
-                budget.setDepenseTotale(depenseTotale);
-                budget.setEpargneReelle(epargneReelle);
-                budget.setTauxDepense(tauxDepense);
-                budget.setDateCreation(LocalDateTime.now());
-                budget.setStatut(StatutBudget.GENERE);
-                budget.setLignesBudget(new ArrayList<>());
+    @Transactional(readOnly = true)
+    public Budget getBudget(UUID idBudget) {
+        return budgetRepository.findById(idBudget)
+                .orElseThrow(() -> new NoSuchElementException("Budget introuvable : " + idBudget));
+    }
 
-                for (LigneBudget ligne : lignes) {
-                        ligne.setIdLigne(null);
-                        ligne.setBudget(budget);
-                        budget.getLignesBudget().add(ligne);
-                }
+    @Transactional(readOnly = true)
+    public List<Budget> getBudgetsParCompte(UUID idCompte) {
+        return budgetRepository.findByCompte_IdCompteOrderByAnneeDescMoisDesc(idCompte);
+    }
 
-                return budgetRepository.save(budget);
+    @Transactional(readOnly = true)
+    public List<LigneBudget> getLignesParBudget(UUID idBudget) {
+        return ligneBudgetRepository.findByBudget_IdBudget(idBudget);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Calculs internes
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Revenu prévu = moyenne simple des revenuTotal des analyses disponibles.
+     */
+    private BigDecimal calculerRevenuPrevu(List<AnalyseMensuelle> analyses) {
+        BigDecimal somme = analyses.stream()
+                .map(AnalyseMensuelle::getRevenuTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return somme.divide(BigDecimal.valueOf(analyses.size()), 3, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Pour chaque catégorie présente sur les 3 mois, calcule le montantPrevu
+     * via une moyenne pondérée normalisée.
+     */
+    private List<LigneBudget> calculerLignes(UUID idCompte,
+                                              List<AnalyseMensuelle> analyses,
+                                              BigDecimal revenuPrevu) {
+
+        Map<String, BigDecimal> depensesParCle = new HashMap<>();
+
+        for (AnalyseMensuelle analyse : analyses) {
+            LocalDateTime debut = LocalDateTime.of(analyse.getAnnee(), analyse.getMois(), 1, 0, 0);
+            LocalDateTime fin   = debut.plusMonths(1).minusSeconds(1);
+
+            List<Transaction> transactions = transactionRepository
+                    .findByCompte_IdCompteAndDateTransactionBetween(idCompte, debut, fin);
+
+            for (Transaction t : transactions) {
+                if (!"DEPENSE".equals(t.getTypeTransaction())) continue;
+                if (t.getCategorie() == null) continue;
+                String cle = analyse.getAnnee() + "-" + analyse.getMois()
+                             + "-" + t.getCategorie();
+                depensesParCle.merge(cle, t.getMontant().abs(), BigDecimal::add);
+            }
         }
 
-      
-        private BigDecimal calculerRevenuMoyen(List<AnalyseMensuelle> fenetre) {
-                BigDecimal total = fenetre.stream()
-                                .map(AnalyseMensuelle::getRevenuTotal)
-                                .filter(Objects::nonNull)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add);
-                return total.divide(BigDecimal.valueOf(fenetre.size()), 3, RoundingMode.HALF_UP);
+        Set<CategorieDepense> categories = depensesParCle.keySet().stream()
+                .map(cle -> CategorieDepense.valueOf(cle.split("-")[2]))
+                .collect(Collectors.toSet());
+
+        List<LigneBudget> lignes = new ArrayList<>();
+
+        for (CategorieDepense categorie : categories) {
+
+            BigDecimal numerateur = BigDecimal.ZERO;
+            double     sommePoids = 0.0;
+
+            for (int i = 0; i < analyses.size(); i++) {
+                AnalyseMensuelle a = analyses.get(i);
+                String cle = a.getAnnee() + "-" + a.getMois() + "-" + categorie.name();
+                BigDecimal montantMois = depensesParCle.get(cle);
+
+                if (montantMois != null) {
+                    double poids = POIDS[i];
+                    numerateur  = numerateur.add(montantMois.multiply(BigDecimal.valueOf(poids)));
+                    sommePoids += poids;
+                }
+            }
+
+            BigDecimal montantPrevu = sommePoids > 0
+                    ? numerateur.divide(BigDecimal.valueOf(sommePoids), 3, RoundingMode.HALF_UP)
+                    : BigDecimal.ZERO;
+
+            LigneBudget ligne = LigneBudget.builder()
+                    .categorie(categorie)
+                    .montantPrevu(montantPrevu)
+                    .montantDepense(BigDecimal.ZERO)
+                    .build();
+
+            ligne.calculerPourcentageSalaire(revenuPrevu);
+            lignes.add(ligne);
         }
 
-        // ── Générer les lignes par catégorie 
-        private List<LigneBudget> genererLignes(UUID idCompte,
-                        List<AnalyseMensuelle> fenetre,
-                        BigDecimal revenuMensuel) {
-
-                List<Transaction> toutesTransactions = new ArrayList<>();
-                for (AnalyseMensuelle analyse : fenetre) {
-                        YearMonth ym = YearMonth.of(analyse.getAnnee(), analyse.getMois());
-                        LocalDateTime start = ym.atDay(1).atStartOfDay();
-                        LocalDateTime end = ym.atEndOfMonth().atTime(23, 59, 59);
-
-                        transactionRepository
-                                        .findByCompte_IdCompteAndDateTransactionBetween(idCompte, start, end)
-                                        .stream()
-                                        .filter(t -> "DEPENSE".equalsIgnoreCase(t.getTypeTransaction()))
-                                        .filter(t -> "VALIDE".equalsIgnoreCase(t.getStatut()))
-                                        .forEach(toutesTransactions::add);
-                }
-
-                Map<CategorieDepense, List<Transaction>> parCategorie = toutesTransactions.stream()
-                                .collect(Collectors.groupingBy(
-                                                t -> CategorieDepense.valueOf(t.getCategorie().trim().toUpperCase())));
-
-                List<LigneBudget> lignes = new ArrayList<>();
-
-                for (Map.Entry<CategorieDepense, List<Transaction>> entry : parCategorie.entrySet()) {
-                        CategorieDepense categorie = entry.getKey();
-                        List<Transaction> txCat = entry.getValue();
-
-                        BigDecimal totalCat = txCat.stream()
-                                        .map(Transaction::getMontant)
-                                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                        BigDecimal montantPrevu = totalCat.divide(
-                                        BigDecimal.valueOf(fenetre.size()), 3, RoundingMode.HALF_UP);
-
-                        BigDecimal  alerteSeuil = montantPrevu.multiply(BigDecimal.valueOf(1.10));
-
-                        BigDecimal pourcentageSalaire = revenuMensuel.compareTo(BigDecimal.ZERO) > 0
-                                        ? montantPrevu.divide(revenuMensuel, 4, RoundingMode.HALF_UP)
-                                        : BigDecimal.ZERO;
-                        BigDecimal pourcentageDepense = BigDecimal.ZERO; 
-
-                        LigneBudget ligne = new LigneBudget();
-                        ligne.setCategorie(categorie);
-                        ligne.setMontantPrevu(montantPrevu);
-                        ligne.setMontantDepense(BigDecimal.ZERO);
-                        ligne.setPourcentageSalaire(pourcentageSalaire);
-                        ligne.setPourcentageDepense(pourcentageDepense);
-                        ligne.setAlerteSeuil(alerteSeuil);
-
-                        lignes.add(ligne);
-                }
-
-                BigDecimal depenseTotale = lignes.stream()
-                                .map(LigneBudget::getMontantPrevu)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                if (depenseTotale.compareTo(BigDecimal.ZERO) > 0) {
-                        lignes.forEach(l -> l.setPourcentageDepense(
-                                        l.getMontantPrevu().divide(depenseTotale, 4, RoundingMode.HALF_UP)));
-                }
-
-                return lignes;
-        }
-        
-
-        // ── Consulter un budget existant ─────────────────────────────────────────
-        public Budget consulterBudget(UUID idCompte, int mois, int annee) {
-                Budget budget = budgetRepository
-                                .findByCompte_IdCompteAndMoisAndAnnee(idCompte, mois, annee)
-                                .orElseThrow(() -> new RuntimeException("Budget introuvable"));
-
-                // Marquer comme consulté si c'était GENERE
-                if (budget.getStatut() == StatutBudget.GENERE) {
-                        budget.setStatut(StatutBudget.CONSULTE);
-                        budgetRepository.save(budget);
-                }
-
-                return budget;
-        }
+        lignes.sort(Comparator.comparing(LigneBudget::getMontantPrevu).reversed());
+        return lignes;
+    }
 }
