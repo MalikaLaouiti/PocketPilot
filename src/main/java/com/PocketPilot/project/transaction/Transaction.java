@@ -16,23 +16,23 @@ import com.PocketPilot.project.comptebancaire.CompteBancaire;
 public class Transaction {
 
     @Id
-    @Column(name = "idtransaction")
+    @Column(name = "id_transaction")
     private UUID idTransaction;
 
     @ManyToOne
-    @JoinColumn(name = "idcompte")
+    @JoinColumn(name = "id_compte")
     private CompteBancaire compte;
 
     @Column(length = 30)
     private String reference;
 
-    @Column(name = "datetransaction")
+    @Column(name = "date_transaction")
     private LocalDateTime dateTransaction;
 
     @Column(precision = 15, scale = 3)
     private BigDecimal montant;
 
-    @Column(name = "typetransaction", length = 10)
+    @Column(name = "type_transaction", length = 10)
     private String typeTransaction;
 
     @Column(length = 20)

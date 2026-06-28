@@ -25,11 +25,11 @@ public class Budget {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "idbudget")
+    @Column(name = "id_budget")
     private UUID idBudget;
     
     @OneToOne
-    @JoinColumn(name = "idcompte")
+    @JoinColumn(name = "id_compte")
     private CompteBancaire compte;
 
     @Column(nullable = false)

@@ -12,7 +12,7 @@ import java.util.UUID;
 public class Client {
 
     @Id
-    @Column(name = "idclient")
+    @Column(name = "id_client")
     @GeneratedValue
     private UUID idClient;
 
@@ -23,7 +23,7 @@ public class Client {
 
     private String prenom;
 
-    @Column(name = "datenaissance")
+    @Column(name = "date_naissance")
     private LocalDate dateNaissance;
 
     private String telephone;

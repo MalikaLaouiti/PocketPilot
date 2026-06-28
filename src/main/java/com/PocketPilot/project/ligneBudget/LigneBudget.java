@@ -19,7 +19,7 @@ public class LigneBudget {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "idLigne")
+    @Column(name = "id_ligne")
     private UUID idLigne;
 
     @Enumerated(EnumType.STRING)
@@ -39,7 +39,7 @@ public class LigneBudget {
     private BigDecimal pourcentageDepense;
  
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idbudget", nullable = false)
+    @JoinColumn(name = "id_budget", nullable = false)
     @JsonBackReference   
     private Budget budget;
  
