@@ -13,6 +13,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "objectif_financier")
+@AllArgsConstructor
 @Data
 @Builder
 public class ObjectifFinancier {
@@ -57,8 +58,11 @@ public class ObjectifFinancier {
     @JsonIgnore
     private CompteBancaire compte;
 
-    @OneToOne(mappedBy = "objectif_financier", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "objectifFinancier", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private PlanObjectif planObjectif;
+
+    public ObjectifFinancier() {
+    }
 
 }
 

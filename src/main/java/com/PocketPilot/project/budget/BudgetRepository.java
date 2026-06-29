@@ -14,4 +14,6 @@ public interface BudgetRepository extends JpaRepository<Budget, UUID> {
     boolean existsByCompte_IdCompteAndMoisAndAnnee(UUID idCompte, int mois, int annee);
  
     List<Budget> findByCompte_IdCompteOrderByAnneeDescMoisDesc(UUID idCompte);
+
+    Optional<Budget> findTopByCompte_IdCompteOrderByDateGenerationDesc(UUID idCompte);
 }

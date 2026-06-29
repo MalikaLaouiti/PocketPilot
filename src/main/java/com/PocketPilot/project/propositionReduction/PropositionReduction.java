@@ -11,6 +11,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "proposition_reduction")
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Builder
 public class PropositionReduction {

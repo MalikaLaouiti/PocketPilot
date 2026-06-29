@@ -11,11 +11,11 @@ import lombok.Data;
 
 
 @Entity 
-@Table(name = "analysemensuelle",
+@Table(name = "analyse_mensuelle",
     uniqueConstraints = {
         @UniqueConstraint(
             name = "uk_analyse_compte_mois_annee",
-            columnNames = {"idcompte", "mois", "annee"}  //no analyse for the same person and the same month and year=>no duplication
+            columnNames = {"id_compte", "mois", "annee"} 
         )
     }
 )
@@ -23,11 +23,11 @@ import lombok.Data;
 public class AnalyseMensuelle {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "idanalyse")
+    @Column(name = "id_analyse")
     private UUID idAnalyse;
 
     @ManyToOne
-    @JoinColumn(name = "idcompte")
+    @JoinColumn(name = "id_compte")
     private CompteBancaire compte;
 
     private Integer mois;

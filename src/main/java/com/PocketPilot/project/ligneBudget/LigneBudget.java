@@ -1,6 +1,7 @@
 package com.PocketPilot.project.ligneBudget;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 @Table(name = "ligne_budget")
 @Data
 @Builder
+@AllArgsConstructor
 public class LigneBudget {
 
     @Id
@@ -42,6 +44,8 @@ public class LigneBudget {
     @JoinColumn(name = "id_budget", nullable = false)
     @JsonBackReference   
     private Budget budget;
+
+    public LigneBudget() {}
  
     public void calculerPourcentageSalaire(BigDecimal revenuPrevu) {
         if (revenuPrevu != null && revenuPrevu.compareTo(BigDecimal.ZERO) > 0) {

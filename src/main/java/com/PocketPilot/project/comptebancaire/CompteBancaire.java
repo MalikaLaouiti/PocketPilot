@@ -11,7 +11,7 @@ import com.PocketPilot.project.client.Client;
 
 
 @Entity
-@Table(name = "comptebancaire")
+@Table(name = "compte_bancaire")
 @Data
 public class CompteBancaire {
     @Id

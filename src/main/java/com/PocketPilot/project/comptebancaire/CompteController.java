@@ -18,13 +18,13 @@ public class CompteController {
         return compteService.getAllComptes();
     }
 
-    @GetMapping("/{idcompte}")
-    public CompteBancaire getCompte(@PathVariable("idcompte") UUID id) {
+    @GetMapping("/{id_compte}")
+    public CompteBancaire getCompte(@PathVariable("id_compte") UUID id) {
         return compteService.getCompteById(id);
     }
 
-    @GetMapping("/byClient/{idclient}")
-    public CompteBancaire getCompteByClientId(@PathVariable("idclient") UUID idClient) {
+    @GetMapping("/byClient/{id_client}")
+    public CompteBancaire getCompteByClientId(@PathVariable("id_client") UUID idClient) {
         return compteService.getCompteByClientId(idClient);
     }
 
@@ -33,8 +33,8 @@ public class CompteController {
         return compteService.createCompte(compte);
     }
 
-    @DeleteMapping("/{idcompte}")
-    public void deleteCompte(@PathVariable("idcompte") UUID id) {
+    @DeleteMapping("/{id_compte}")
+    public void deleteCompte(@PathVariable("id_compte") UUID id) {
         compteService.deleteCompte(id);
     }
     

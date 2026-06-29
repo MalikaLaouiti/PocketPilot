@@ -22,10 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BudgetService {
 
-    /**
-     * Poids de pondération par ancienneté (index 0 = mois le plus récent).
-     * N-1 : 50 %  |  N-2 : 33 %  |  N-3 : 17 %
-     */
+
     private static final double[] POIDS = {0.50, 0.33, 0.17};
 
     private final BudgetRepository      budgetRepository;
@@ -33,9 +30,6 @@ public class BudgetService {
     private final AnalyseRepository     analyseRepository;
     private final TransactionRepository transactionRepository;
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Génération du budget prévisionnel
-    // ─────────────────────────────────────────────────────────────────────────
 
     @Transactional
     public Budget genererBudgetMoisSuivant(UUID idCompte) {
@@ -91,9 +85,6 @@ public class BudgetService {
         return saved;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Lecture
-    // ─────────────────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
     public boolean existeBudgetMoisSuivant(UUID idCompte) {
@@ -122,13 +113,7 @@ public class BudgetService {
         return ligneBudgetRepository.findByBudget_IdBudget(idBudget);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Calculs internes
-    // ─────────────────────────────────────────────────────────────────────────
 
-    /**
-     * Revenu prévu = moyenne simple des revenuTotal des analyses disponibles.
-     */
     private BigDecimal calculerRevenuPrevu(List<AnalyseMensuelle> analyses) {
         BigDecimal somme = analyses.stream()
                 .map(AnalyseMensuelle::getRevenuTotal)
@@ -136,10 +121,7 @@ public class BudgetService {
         return somme.divide(BigDecimal.valueOf(analyses.size()), 3, RoundingMode.HALF_UP);
     }
 
-    /**
-     * Pour chaque catégorie présente sur les 3 mois, calcule le montantPrevu
-     * via une moyenne pondérée normalisée.
-     */
+    
     private List<LigneBudget> calculerLignes(UUID idCompte,
                                               List<AnalyseMensuelle> analyses,
                                               BigDecimal revenuPrevu) {
@@ -202,4 +184,6 @@ public class BudgetService {
         lignes.sort(Comparator.comparing(LigneBudget::getMontantPrevu).reversed());
         return lignes;
     }
+
+    
 }

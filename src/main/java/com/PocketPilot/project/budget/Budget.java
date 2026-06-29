@@ -1,6 +1,7 @@
 package com.PocketPilot.project.budget;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,10 +18,11 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Entity
 @Table(
     name = "budget",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"mois", "annee"})
+    uniqueConstraints = @UniqueConstraint(columnNames = {"id_compte", "mois", "annee"})
 )
 @Data
 @Builder
+@AllArgsConstructor
 public class Budget {
 
     @Id
@@ -61,6 +63,8 @@ public class Budget {
     @JsonManagedReference
     @Builder.Default
     private List<LigneBudget> lignesBudget = new ArrayList<>();
+
+    public Budget() {}
 
     public void addLigne(LigneBudget ligne) {
         ligne.setBudget(this);

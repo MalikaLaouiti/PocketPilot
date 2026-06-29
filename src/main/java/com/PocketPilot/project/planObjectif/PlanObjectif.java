@@ -15,6 +15,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "plan_objectif")
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Builder
 public class PlanObjectif {
@@ -51,6 +53,7 @@ public class PlanObjectif {
     @JsonIgnore
     private Budget budgetPrevisionnel;
 
-    @OneToMany(mappedBy = "plan_objectif", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "planObjectif", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PropositionReduction> propositionsReduction;
+
 }
