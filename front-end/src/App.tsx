@@ -7,6 +7,7 @@ import { Analysis } from './pages/Analysis'
 import { Budget } from './pages/Budget'
 import { Objectives } from './pages/Objectives'
 import { ObjectivePlan } from './pages/ObjectivePlan'
+import { Profile } from './pages/Profile'
 
 const App: React.FC = () => {
   return (
@@ -20,6 +21,7 @@ const App: React.FC = () => {
           <Route path="/budget" element={<Budget />} />
           <Route path="/objectives" element={<Objectives />} />
           <Route path="/objectives/plan" element={<ObjectivePlan />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </Box>
     </Router>
