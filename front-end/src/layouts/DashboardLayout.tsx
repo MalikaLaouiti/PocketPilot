@@ -14,6 +14,7 @@ import {
   useDisclosure,
   IconButton,
   Avatar,
+  Image ,
   Menu,
   MenuButton,
   MenuList,
@@ -62,18 +63,22 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       align="stretch"
     >
       <Box pb="4" borderBottom="1px" borderBottomColor={colorMode === 'dark' ? '#2a2540' : '#e8e4f1'}>
-        <Text 
-          fontSize="2xl" 
-          fontWeight="bold" 
-          background="linear-gradient(135deg, #756ab6 0%, #ac87c5 100%)"
-          backgroundClip="text"
-          color="transparent"
-        >
-          ✨ PocketPilot
-        </Text>
-        <Text fontSize="xs" color={colorMode === 'dark' ? 'gray.500' : 'gray.600'} mt="1">
-          Gestion financière
-        </Text>
+        
+          <Image
+            src="\logo-bankerise-01.png"
+            alt="PocketPilot icon"
+            boxSize="85px"
+          />
+          <Text
+            fontSize="2xl"
+            fontWeight="bold"
+            background="linear-gradient(135deg, #756ab6 0%, #ac87c5 100%)"
+            backgroundClip="text"
+            color="transparent"
+          >
+            PocketPilot
+          </Text>
+        
       </Box>
 
       <VStack spacing="2" align="stretch" flex="1">
@@ -88,15 +93,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               fontWeight="600"
               borderRadius="10px"
               transition="all 0.3s ease"
-              bg={isActive(item.path) 
-                ? 'brand.500' 
+              bg={isActive(item.path)
+                ? 'brand.500'
                 : colorMode === 'dark' ? 'transparent' : 'transparent'}
-              color={isActive(item.path) 
-                ? 'white' 
+              color={isActive(item.path)
+                ? 'white'
                 : colorMode === 'dark' ? 'gray.400' : 'gray.700'}
               _hover={{
-                bg: isActive(item.path) 
-                  ? 'brand.600' 
+                bg: isActive(item.path)
+                  ? 'brand.600'
                   : colorMode === 'dark' ? '#2a2540' : '#f5f1fa',
                 color: isActive(item.path) ? 'white' : 'brand.600',
               }}
@@ -154,9 +159,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               variant="ghost"
               _hover={{ bg: colorMode === 'dark' ? '#2a2540' : '#f5f1fa' }}
             />
-            <Text 
-              fontSize="lg" 
-              fontWeight="700" 
+            <Text
+              fontSize="lg"
+              fontWeight="700"
               color={colorMode === 'dark' ? 'gray.100' : 'gray.900'}
               letterSpacing="-0.5px"
             >
@@ -203,7 +208,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   _hover={{ transform: 'scale(1.05)' }}
                 />
               </MenuButton>
-              <MenuList 
+              <MenuList
                 bg={colorMode === 'dark' ? '#1a1828' : '#ffffff'}
                 borderColor={colorMode === 'dark' ? '#2a2540' : '#e8e4f1'}
               >
@@ -218,9 +223,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </Flex>
 
         {/* Page Content */}
-        <Box 
-          p={{ base: '4', lg: '8' }} 
-          flex="1" 
+        <Box
+          p={{ base: '4', lg: '8' }}
+          flex="1"
           overflowY="auto"
           bg={colorMode === 'dark' ? '#0f0d17' : '#f8f7fb'}
         >
