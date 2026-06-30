@@ -3,10 +3,12 @@ import { Grid, VStack, Box, Text, useColorMode } from '@chakra-ui/react'
 import { DashboardLayout } from '../layouts/DashboardLayout'
 import { StatCard } from '../components/StatCard'
 import { ChartPlaceholder } from '../components/ChartPlaceholder'
+import { useTransactionsByCompte } from '../hooks/useTransactions'
 
 export const Dashboard: React.FC = () => {
   const { colorMode } = useColorMode()
-
+  const { data, isLoading, isError, error } = useTransactionsByCompte('547d84b0-6537-4b85-951d-f6b111acc9e5')
+  console.log({ data, isLoading, isError, error })
   return (
     <DashboardLayout pageTitle="Tableau de bord">
       <VStack spacing="8" align="stretch">
