@@ -2,6 +2,8 @@ package com.PocketPilot.project.transaction;
 
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,6 +33,6 @@ public class TransactionService {
     }
 
     public List<Transaction> getTransactionsByCompte(UUID idCompte) {
-        return transactionRepository.findByCompte_IdCompte(idCompte);
+        return transactionRepository.findByCompte_IdCompte(idCompte, Sort.by("dateTransaction").descending());
     }
 }
