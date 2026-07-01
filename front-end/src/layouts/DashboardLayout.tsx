@@ -1,26 +1,6 @@
 import React from 'react'
-import {
-  Box,
-  Flex,
-  VStack,
-  HStack,
-  Text,
-  Button,
-  useColorMode,
-  Drawer,
-  DrawerBody,
-  DrawerOverlay,
-  DrawerContent,
-  useDisclosure,
-  IconButton,
-  Avatar,
-  Image ,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-} from '@chakra-ui/react'
-import { MoonIcon, SunIcon, HamburgerIcon, BellIcon } from '@chakra-ui/icons'
+import {Box,Flex,VStack,HStack,Text,Button,useColorMode,Drawer,DrawerBody,DrawerOverlay,DrawerContent,useDisclosure,IconButton,Avatar,Image,Menu,MenuButton,MenuList, MenuItem } from '@chakra-ui/react'
+import { MoonIcon, SunIcon, HamburgerIcon } from '@chakra-ui/icons'
 import { Link, useLocation } from 'react-router-dom'
 
 interface NavItem {
@@ -62,25 +42,55 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       borderRightColor={colorMode === 'dark' ? '#2a2540' : '#e8e4f1'}
       align="stretch"
     >
-      <Box pb="4" borderBottom="1px" borderBottomColor={colorMode === 'dark' ? '#2a2540' : '#e8e4f1'}>
-        
-          <Image
-            src="\logo-bankerise-01.png"
-            alt="PocketPilot icon"
-            boxSize="85px"
-          />
-          <Text
-            fontSize="2xl"
-            fontWeight="bold"
-            background="linear-gradient(135deg, #756ab6 0%, #ac87c5 100%)"
-            backgroundClip="text"
-            color="transparent"
+       <Box pb="6" borderBottom="1px" borderBottomColor={colorMode === 'dark' ? '#2a2540' : '#e8e4f1'}>
+        <HStack spacing="3" align="center">
+          {/* Logo with modern container */}
+          <Box
+            position="relative"
+            borderRadius="12px"
+            overflow="hidden"
+            bg="accent.200"
+            p="1.5"
+            boxShadow="0 4px 16px rgba(117, 106, 182, 0.25)"
+            transition="transform 0.2s ease"
+            _hover={{ transform: 'scale(1.02)' }}
           >
-            PocketPilot
-          </Text>
-        
-      </Box>
+            <Image
+              src="/logo-bankerise-01.png"
+              alt="PocketPilot"
+              boxSize="42px"
+              objectFit="cover"
+              borderRadius="8px"
+              fallbackSrc="https://via.placeholder.com/42x42?text=💰"
+            />
+          </Box>
 
+          {/* Brand name and tagline */}
+          <Box>
+            <Text
+              fontSize="lg"
+              fontWeight="800"
+              background="accent.400"
+              backgroundClip="text"
+              color="transparent"
+              letterSpacing="-0.5px"
+              lineHeight="1.2"
+            >
+              PocketPilot
+            </Text>
+            <Text
+              fontSize="2xs"
+              color={colorMode === 'dark' ? 'gray.400' : 'gray.500'}
+              fontWeight="500"
+              letterSpacing="0.5px"
+              textTransform="uppercase"
+              mt="-2px"
+            >
+              Learn to Unlock Savings
+            </Text>
+          </Box>
+        </HStack>
+      </Box>
       <VStack spacing="2" align="stretch" flex="1">
         {navItems.map((item) => (
           <Link key={item.path} to={item.path} style={{ textDecoration: 'none' }}>
@@ -170,7 +180,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           </HStack>
 
           <HStack spacing="3">
-            <IconButton
+            {/* <IconButton
               icon={<BellIcon />}
               aria-label="Notifications"
               variant="ghost"
@@ -187,7 +197,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 borderRadius="full"
                 boxShadow="0 0 8px rgba(224, 174, 208, 0.6)"
               />
-            </IconButton>
+            </IconButton> */}
 
             <IconButton
               icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
