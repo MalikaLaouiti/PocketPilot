@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import {
   Box,
   Flex,
@@ -145,7 +145,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           p="4"
           align="center"
           justify="space-between"
-          sticky
+          position="sticky"
           top="0"
           zIndex="10"
           transition="all 0.3s ease"
