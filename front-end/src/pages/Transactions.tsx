@@ -14,98 +14,40 @@ import {
   Text,
   useColorMode,
   InputGroup,
-  InputLeftElement,
+  InputLeftElement
 } from '@chakra-ui/react'
 import { SearchIcon } from '@chakra-ui/icons'
 import { DashboardLayout } from '../layouts/DashboardLayout'
+import { useTransactionsByCompte } from '../hooks/useTransactions'
+import { LoadingSkeleton } from '../components/LoadingSkeleton'
 
-interface Transaction {
-  id: string
-  date: string
-  description: string
-  category: string
-  amount: string
-  type: 'income' | 'expense'
-}
-
-const mockTransactions: Transaction[] = [
-  {
-    id: '1',
-    date: '2024-06-28',
-    description: 'Salary Deposit',
-    category: 'Income',
-    amount: '+$5,000',
-    type: 'income',
-  },
-  {
-    id: '2',
-    date: '2024-06-28',
-    description: 'Grocery Store',
-    category: 'Food',
-    amount: '-$85.50',
-    type: 'expense',
-  },
-  {
-    id: '3',
-    date: '2024-06-27',
-    description: 'Gas Station',
-    category: 'Transportation',
-    amount: '-$45.00',
-    type: 'expense',
-  },
-  {
-    id: '4',
-    date: '2024-06-27',
-    description: 'Restaurant',
-    category: 'Dining',
-    amount: '-$62.30',
-    type: 'expense',
-  },
-  {
-    id: '5',
-    date: '2024-06-26',
-    description: 'Netflix Subscription',
-    category: 'Entertainment',
-    amount: '-$15.99',
-    type: 'expense',
-  },
-  {
-    id: '6',
-    date: '2024-06-26',
-    description: 'Freelance Payment',
-    category: 'Income',
-    amount: '+$800',
-    type: 'income',
-  },
-  {
-    id: '7',
-    date: '2024-06-25',
-    description: 'Gym Membership',
-    category: 'Health',
-    amount: '-$60',
-    type: 'expense',
-  },
-  {
-    id: '8',
-    date: '2024-06-25',
-    description: 'Online Shopping',
-    category: 'Shopping',
-    amount: '-$120.75',
-    type: 'expense',
-  },
-]
 
 export const Transactions: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const { colorMode } = useColorMode()
-
-  const filteredTransactions = mockTransactions.filter((t) =>
+  const { data, isLoading, isError, error } = useTransactionsByCompte('547d84b0-6537-4b85-951d-f6b111acc9e5')
+  console.log({ data, isLoading, isError, error })
+  
+  if (isLoading) {
+    return (
+      <DashboardLayout pageTitle="Transactions">
+        <LoadingSkeleton count={4} type="table"/>
+      </DashboardLayout>
+    )
+  }
+  if (!data || isError){
+    return  (
+      <DashboardLayout pageTitle="Transactions"> 
+        <Text color="red.500">Erreur de chargement des transactions</Text>
+      </DashboardLayout>)
+  }
+  const filteredTransactions = data.filter((t) =>
     t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    t.category.toLowerCase().includes(searchTerm.toLowerCase())
+    t.categorie.toLowerCase().includes(searchTerm.toLowerCase())
   )
-
   return (
     <DashboardLayout pageTitle="Transactions">
+      
       <VStack spacing="6" align="stretch">
         {/* Header */}
         <Box>
@@ -159,15 +101,6 @@ export const Transactions: React.FC = () => {
               color="brand.500"
             >
               Filtrer
-            </Button>
-            <Button 
-              colorScheme="brand" 
-              flex={{ base: 1, md: 'auto' }}
-              fontSize="sm"
-              fontWeight="600"
-              borderRadius="10px"
-            >
-              Nouvelle transaction
             </Button>
           </HStack>
         </HStack>
@@ -239,9 +172,9 @@ export const Transactions: React.FC = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {filteredTransactions.map((transaction, index) => (
+              {filteredTransactions.map((transaction) => (
                 <Tr
-                  key={transaction.id}
+                  key={transaction.idTransaction}
                   borderBottom="1px"
                   borderBottomColor={colorMode === 'dark' ? '#2a2540' : '#e8e4f1'}
                   _hover={{
@@ -251,7 +184,7 @@ export const Transactions: React.FC = () => {
                   _last={{ borderBottom: 'none' }}
                 >
                   <Td fontSize="sm" fontWeight="500" px="6" py="4" color={colorMode === 'dark' ? 'gray.300' : 'gray.700'}>
-                    {transaction.date}
+                    {new Date(transaction.dateTransaction).toLocaleString('fr-FR', {weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'})}
                   </Td>
                   <Td fontSize="sm" fontWeight="600" px="6" py="4" color={colorMode === 'dark' ? 'gray.100' : 'gray.900'}>
                     {transaction.description}
@@ -270,7 +203,7 @@ export const Transactions: React.FC = () => {
                       bg={colorMode === 'dark' ? '#2a2540' : '#f5f1fa'}
                       display="inline-block"
                     >
-                      {transaction.category}
+                      {transaction.categorie}
                     </Box>
                   </Td>
                   <Td
@@ -279,9 +212,9 @@ export const Transactions: React.FC = () => {
                     fontSize="sm"
                     px="6"
                     py="4"
-                    color={transaction.type === 'income' ? 'success.500' : 'accent.500'}
+                    color={transaction.typeTransaction === 'REVENU' ? 'success.500' : 'accent.500'}
                   >
-                    {transaction.amount}
+                    {transaction.montant} TND
                   </Td>
                 </Tr>
               ))}
