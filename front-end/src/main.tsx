@@ -6,6 +6,7 @@ import { ChakraProvider } from '@chakra-ui/react'
 import App from './App'
 import theme from './theme'
 import './styles/fonts.css'
+import { CompteProvider } from './context/CompteContext'
 
 const queryClient = new QueryClient()
 
@@ -13,8 +14,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
-        <App />
-         <ReactQueryDevtools initialIsOpen={false} />
+        <CompteProvider>
+          <App />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </CompteProvider>
       </QueryClientProvider>
     </ChakraProvider>
   </React.StrictMode>,
