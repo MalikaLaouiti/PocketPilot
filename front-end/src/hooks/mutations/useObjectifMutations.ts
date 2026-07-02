@@ -3,12 +3,18 @@ import { apiClient } from '../../api/client'
 import type { ObjectifFinancier } from '../../types/objectifFinancier'
 import type { PlanObjectif } from '../../types/planObjectif'
 
-type CreateObjectifPayload = Omit<ObjectifFinancier, 'idObjectif' | 'planObjectif' | 'tauxProgression' | 'dateAtteinte'>
+export interface CreerObjectifPayload {
+  titre: string
+  description?: string
+  montantCible: number
+  dateCible: string
+  priorite: string
+}
 
 export function useCreerObjectif(idCompte: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (payload: CreateObjectifPayload) =>
+    mutationFn: (payload: CreerObjectifPayload) =>
       apiClient.post<ObjectifFinancier>(`/objectifs?idCompte=${idCompte}`, payload).then(r => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['objectifs', idCompte] }),
   })
