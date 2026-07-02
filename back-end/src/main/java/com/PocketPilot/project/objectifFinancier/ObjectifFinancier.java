@@ -66,13 +66,6 @@ public class ObjectifFinancier {
 
 }
 
-enum StatutObjectif {
-    EN_ATTENTE,
-    EN_COURS,
-    ATTEINT,
-    ABANDONNE
-}
-
 enum NiveauPriorite {
     FAIBLE,
     NORMALE,
