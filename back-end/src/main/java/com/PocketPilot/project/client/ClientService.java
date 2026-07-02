@@ -28,4 +28,17 @@ public class ClientService {
     public void deleteClient(UUID id) {
         clientRepository.deleteById(id);
     }
+
+    public Client updateClient(UUID id, Client updatedClient) {
+        return clientRepository.findById(id)
+                .map(client -> {
+                    client.setNom(updatedClient.getNom()!=null ? updatedClient.getNom() : client.getNom());
+                    client.setPrenom(updatedClient.getPrenom()!=null ? updatedClient.getPrenom() : client.getPrenom());
+                    client.setAdresse(updatedClient.getAdresse()!=null ? updatedClient.getAdresse() : client.getAdresse());
+                    client.setEmail(updatedClient.getEmail()!=null ? updatedClient.getEmail() : client.getEmail());
+                    client.setTelephone(updatedClient.getTelephone()!=null ? updatedClient.getTelephone() : client.getTelephone());
+                    return clientRepository.save(client);
+                })
+                .orElseThrow();
+    }
 }

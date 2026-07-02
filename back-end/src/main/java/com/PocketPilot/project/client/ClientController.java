@@ -29,6 +29,11 @@ public class ClientController {
         return clientService.createClient(client);
     }
 
+    @PutMapping("/{idclient}")
+    public Client updateClient(@PathVariable("idclient") UUID id, @RequestBody Client client) {
+        return clientService.updateClient(id, client);
+    }
+
     @DeleteMapping("/{idclient}")
     public void deleteClient(@PathVariable("idclient") UUID id) {
         clientService.deleteClient(id);
