@@ -5,8 +5,8 @@ import {
 } from '@chakra-ui/react'
 import { useCreerObjectif } from '../../hooks/mutations/useObjectifMutations' 
 import { useCompteActif } from '../../context/CompteContext'
-import { PRIORITE_CONFIG } from '../../types/objectifEnums'
-import type { NiveauPriorite } from '../../types/enums'
+import { PRIORITE_CONFIG } from '../../types/constants/objectifEnums'
+import type { NiveauPriorite } from '../../types/constants/enums'
 import { useState } from 'react'
 
 interface CreateObjectifModalProps {

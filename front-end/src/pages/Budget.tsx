@@ -6,7 +6,7 @@ import { BudgetAllocationCard } from '../components/BudgetAllocationCard'
 import { useBudgets } from '../hooks/useBudgets'
 import { useAnalyse } from '../hooks/useAnalyse'
 import { useCompteActif } from '../context/CompteContext'
-import { STATUT_BUDGET_CONFIG } from '../types/budgetEnums'
+import { STATUT_BUDGET_CONFIG } from '../types/constants/budgetEnums'
 import type { Budget } from '../types/budget'
 
 const MOIS_LABELS = [

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Box, HStack, VStack, Text, Badge, useColorMode } from '@chakra-ui/react'
-import type { CategorieDepense } from '../types/enums'
-import { CATEGORIE_CONFIG } from '../types/budgetEnums'
+import type { CategorieDepense } from '../types/constants/enums'
+import { CATEGORIE_CONFIG } from '../types/constants/budgetEnums'
 
 interface BudgetAllocationCardProps {
   categorie: CategorieDepense

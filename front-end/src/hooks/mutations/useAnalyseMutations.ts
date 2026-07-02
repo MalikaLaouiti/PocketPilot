@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../../api/client'
-import type { AnalyseMensuelle } from '../../types/analyseMensuelle'
+import type { AnalyseMensuelle } from '../../types/constants/analyseMensuelle'
 
 export function useGenererAnalyse(idCompte: string) {
   const qc = useQueryClient()

@@ -19,8 +19,8 @@ import {
 } from '@chakra-ui/react'
 import { DeleteIcon } from '@chakra-ui/icons'
 import { FiAlertCircle } from 'react-icons/fi'
-import { PRIORITE_CONFIG, STATUT_OBJECTIF_CONFIG } from '../../types/objectifEnums'
-import type { ObjectifFinancier } from '../../types/objectifFinancier'
+import { PRIORITE_CONFIG, STATUT_OBJECTIF_CONFIG } from '../../types/constants/objectifEnums'
+import type { ObjectifFinancier } from '../../types/constants/objectifFinancier'
 import { useCompteActif } from '../../context/CompteContext'
 import { useGenererPlan } from '../../hooks/mutations/useObjectifMutations'
 

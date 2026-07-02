@@ -2,7 +2,7 @@ import {
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter,
   Spinner, Center, VStack, HStack, Box, Text, Badge, Grid, Button, useColorMode,
 } from '@chakra-ui/react'
-import { CATEGORIE_CONFIG } from '../../types/budgetEnums'
+import { CATEGORIE_CONFIG } from '../../types/constants/budgetEnums'
 import { usePlanObjectif } from '../../hooks/usePlanObjectif'
 import { useGenererPlan } from '../../hooks/mutations/useObjectifMutations' 
 import { useCompteActif } from '../../context/CompteContext'
