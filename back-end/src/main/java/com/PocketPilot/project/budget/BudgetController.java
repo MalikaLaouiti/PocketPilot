@@ -25,6 +25,13 @@ public class BudgetController {
         return ResponseEntity.status(status).body(budget);
     }
 
+    @PostMapping("/generer/all")
+    public ResponseEntity<List<Budget>> genererBudgets() {
+        List<Budget> budgets = budgetService.genererBudgetTousLesComptes();
+        return ResponseEntity.ok(budgets);
+    }
+    
+
     @GetMapping
     public ResponseEntity<List<Budget>> getBudgets(@RequestParam UUID idCompte) {
         return ResponseEntity.ok(budgetService.getBudgetsParCompte(idCompte));

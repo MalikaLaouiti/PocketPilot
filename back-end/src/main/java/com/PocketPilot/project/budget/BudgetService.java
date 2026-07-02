@@ -2,6 +2,8 @@ package com.PocketPilot.project.budget;
 
 import com.PocketPilot.project.analyse.AnalyseMensuelle;
 import com.PocketPilot.project.analyse.AnalyseRepository;
+import com.PocketPilot.project.comptebancaire.CompteBancaire;
+import com.PocketPilot.project.comptebancaire.CompteRepository;
 import com.PocketPilot.project.ligneBudget.*;
 import com.PocketPilot.project.transaction.Transaction;
 import com.PocketPilot.project.transaction.TransactionRepository;
@@ -29,6 +31,7 @@ public class BudgetService {
     private final LigneRepository ligneBudgetRepository;
     private final AnalyseRepository     analyseRepository;
     private final TransactionRepository transactionRepository;
+    private final CompteRepository      compteRepository;
 
 
     @Transactional
@@ -43,7 +46,6 @@ public class BudgetService {
                     "Impossible de générer un budget : aucune analyse disponible pour le compte " + idCompte);
         }
 
-        // FIX 1 — mois cible = mois suivant le plus récent mois analysé (pas YearMonth.now())
         AnalyseMensuelle analyseRecente = analyses.get(0);
         YearMonth moisCible = YearMonth.of(analyseRecente.getAnnee(), analyseRecente.getMois()).plusMonths(1);
         int mois  = moisCible.getMonthValue();
@@ -185,5 +187,13 @@ public class BudgetService {
         return lignes;
     }
 
+    public List<Budget> genererBudgetTousLesComptes() {
+
+                List<CompteBancaire> comptes = compteRepository.findAll();
+
+                return comptes.stream()
+                                .map(compte -> genererBudgetMoisSuivant(compte.getIdCompte()))
+                                .collect(Collectors.toList());
+        }
     
 }
