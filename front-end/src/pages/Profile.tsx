@@ -7,12 +7,12 @@ import { DangerZoneCard } from '../components/Profile/DangerZoneCard'
 import { BankInformationCard } from '../components/Profile/BankInformationCard'
 import { PersonalInformationCard } from '../components/Profile/PersonalInformationCard'
 import { ProfileHeader } from '../components/Profile/ProfileHeader'
+import { useUpdateClient } from '../hooks/mutations/useClientMutation'
 export const Profile: React.FC = () => {
   const { colorMode } = useColorMode()
   const { compte, isLoading } = useCompteActif()
   const [isEditing, setIsEditing] = useState(false)
-  
-  // États pour les données modifiables
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -26,7 +26,6 @@ export const Profile: React.FC = () => {
     newsletter: true,
   })
 
-  // Mettre à jour le formulaire lorsque les données du compte sont chargées
   useEffect(() => {
     if (compte?.client) {
       setFormData(prev => ({
@@ -41,21 +40,38 @@ export const Profile: React.FC = () => {
     }
   }, [compte])
 
+  // ✅ Hook appelé inconditionnellement, à chaque render, avant tout `return`
+  const { mutate: updateClient, isPending: isUpdating } = useUpdateClient(
+    compte?.client.idClient ?? ''   // idClient vide tant que compte n'est pas chargé
+  )
+
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }))
+    setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleEditToggle = () => {
-    if (isEditing) {
-      // Ici vous pouvez appeler une API pour sauvegarder les modifications
-      console.log('Saving profile data:', formData)
+    if (!isEditing) {
+      setIsEditing(true)
+      return
     }
-    setIsEditing(!isEditing)
+
+    updateClient(
+      {
+        nom: formData.lastName,
+        prenom: formData.firstName,
+        email: formData.email,
+        telephone: formData.phone,
+        adresse: formData.address,
+        profession: formData.profession,
+      },
+      {
+        onSuccess: () => setIsEditing(false),
+        onError: (error) => console.error(error),
+      }
+    )
   }
 
+  // ✅ Les `return` conditionnels arrivent APRÈS tous les hooks
   if (isLoading) {
     return (
       <DashboardLayout pageTitle="Mon profil">
@@ -75,36 +91,23 @@ export const Profile: React.FC = () => {
   return (
     <DashboardLayout pageTitle="Mon profil">
       <VStack spacing="8" align="stretch" maxW="4xl">
-        {/* Header */}
         <Box>
-          <Text 
-            fontSize="2xl" 
-            fontWeight="700" 
-            color={colorMode === 'dark' ? 'gray.100' : 'gray.900'}
-            mb="2"
-            letterSpacing="-0.5px"
-          >
+          <Text fontSize="2xl" fontWeight="700" color={colorMode === 'dark' ? 'gray.100' : 'gray.900'} mb="2" letterSpacing="-0.5px">
             Profil utilisateur
           </Text>
-          <Text 
-            fontSize="sm" 
-            color={colorMode === 'dark' ? 'gray.500' : 'gray.600'}
-            fontWeight="500"
-          >
+          <Text fontSize="sm" color={colorMode === 'dark' ? 'gray.500' : 'gray.600'} fontWeight="500">
             Gérez vos informations personnelles et vos préférences
           </Text>
         </Box>
 
-        {/* Profile Header */}
         <ProfileHeader
           firstName={formData.firstName}
           lastName={formData.lastName}
           email={formData.email}
-          isEditing={isEditing}
+          isEditing={isUpdating || isEditing}
           onEditToggle={handleEditToggle}
         />
 
-        {/* Personal Information */}
         <PersonalInformationCard
           firstName={formData.firstName}
           lastName={formData.lastName}
@@ -116,7 +119,6 @@ export const Profile: React.FC = () => {
           onInputChange={handleInputChange}
         />
 
-        {/* Bank Information */}
         <BankInformationCard
           compte={{
             rib: compte.rib,
@@ -130,17 +132,6 @@ export const Profile: React.FC = () => {
           }}
         />
 
-        {/* Preferences */}
-        {/* <PreferencesCard
-          language={formData.language}
-          notifications={formData.notifications}
-          twoFactor={formData.twoFactor}
-          newsletter={formData.newsletter}
-          isEditing={isEditing}
-          onInputChange={handleInputChange}
-        /> */}
-
-        {/* Danger Zone */}
         <DangerZoneCard />
       </VStack>
     </DashboardLayout>

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../../api/client'
-import type { ObjectifFinancier } from '../../types/constants/objectifFinancier'
-import type { PlanObjectif } from '../../types/constants/planObjectif'
+import type { ObjectifFinancier } from '../../types/objectifFinancier'
+import type { PlanObjectif } from '../../types/planObjectif'
 
 export interface CreerObjectifPayload {
   titre: string
