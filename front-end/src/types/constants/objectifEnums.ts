@@ -1,4 +1,4 @@
-import type { NiveauPriorite, StatutObjectif } from '../types/enums'
+import type { NiveauPriorite, StatutObjectif } from '../../types/constants/enums'
 
 interface Config { label: string; colorScheme: string }
 

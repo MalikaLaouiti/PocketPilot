@@ -1,4 +1,4 @@
-import type { NiveauScore } from '../../types/constants/scoreSante'
+import type { NiveauScore } from '../scoreSante'
 
 interface Config { label: string; colorScheme: string; hex: string }
 

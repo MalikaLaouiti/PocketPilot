@@ -1,5 +1,5 @@
 import type { CompteBancaire } from "./compte"
-import type { StatutBudget } from "./enums"
+import type { StatutBudget } from "./constants/enums"
 import type { LigneBudget } from "./ligneBudget"
 
 export interface Budget {

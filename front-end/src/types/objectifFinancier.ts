@@ -1,4 +1,4 @@
-import type { NiveauPriorite, StatutObjectif } from "./enums"
+import type { NiveauPriorite, StatutObjectif } from "./constants/enums"
 import type { PlanObjectif } from "./planObjectif"
 
 export interface ObjectifFinancier {

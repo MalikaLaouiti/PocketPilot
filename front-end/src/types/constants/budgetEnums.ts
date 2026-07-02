@@ -1,4 +1,4 @@
-import type { CategorieDepense, StatutBudget, NiveauPriorite, StatutObjectif } from '../types/enums'
+import type { CategorieDepense, StatutBudget, NiveauPriorite, StatutObjectif } from '../../types/constants/enums'
 
 interface CategorieConfig {
   label: string

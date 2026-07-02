@@ -1,4 +1,4 @@
-import type { CategorieDepense } from "./enums"
+import type { CategorieDepense } from "./constants/enums"
 
 export interface PropositionReduction {
   id: string
