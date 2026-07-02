@@ -4,7 +4,7 @@ import { Box } from '@chakra-ui/react'
 import { Dashboard } from './pages/Dashboard'
 import { Transactions } from './pages/Transactions'
 import { Analysis } from './pages/Analysis'
-import { Budget } from './pages/Budget'
+import { BudgetPage } from './pages/Budget'
 import { Objectives } from './pages/Objectives'
 import { ObjectivePlan } from './pages/ObjectivePlan'
 import { Profile } from './pages/Profile'
@@ -18,7 +18,7 @@ const App: React.FC = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/analysis" element={<Analysis />} />
-          <Route path="/budget" element={<Budget />} />
+          <Route path="/budget" element={<BudgetPage />} />
           <Route path="/objectives" element={<Objectives />} />
           <Route path="/objectives/plan" element={<ObjectivePlan />} />
           <Route path="/profile" element={<Profile />} />
