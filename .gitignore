@@ -15,10 +15,11 @@ lerna-debug.log*
 .env.*
 !.env.example
 
-*.local
+*-local.properties
 
 # Java / Spring Boot
 
+bin/
 .gradle/
 build/
 target/
