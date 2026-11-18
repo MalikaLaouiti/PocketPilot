@@ -5,6 +5,7 @@ import {
 import { CATEGORIE_CONFIG } from '../../types/constants/budgetEnums'
 import { usePlanObjectif } from '../../hooks/usePlanObjectif'
 import { useGenererPlan } from '../../hooks/mutations/useObjectifMutations' 
+import { useConseilIA } from '../../hooks/useConseilIA'
 import { useCompteActif } from '../../context/CompteContext'
 
 const formatCurrency = (amount: number) =>
@@ -23,6 +24,8 @@ export function PlanModal({ isOpen, onClose, idObjectif }: PlanModalProps) {
   const { compte } = useCompteActif()
   const { data: plan, isLoading, isError } = usePlanObjectif(idObjectif ?? '')
   const { mutate: generer, isPending } = useGenererPlan(compte?.idCompte ?? '')
+  const { data: conseil, isLoading: conseilLoading, refetch: refetchConseil } =
+    useConseilIA(idObjectif ?? '', isOpen && !!plan)
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
@@ -48,7 +51,7 @@ export function PlanModal({ isOpen, onClose, idObjectif }: PlanModalProps) {
           <>
             <ModalBody>
               <VStack align="stretch" spacing="6">
-                {plan.commentaire && (
+                {(conseilLoading || conseil || plan.commentaire) && (
                   <Box
                     bg={colorMode === 'dark' ? 'whiteAlpha.50' : 'brand.50'}
                     borderLeft="4px solid"
@@ -56,7 +59,18 @@ export function PlanModal({ isOpen, onClose, idObjectif }: PlanModalProps) {
                     p="3"
                     borderRadius="8px"
                   >
-                    <Text fontSize="sm" fontStyle="italic">💬 {plan.commentaire}</Text>
+                    {conseilLoading ? (
+                      <HStack><Spinner size="xs" color="brand.500" /><Text fontSize="sm" color="gray.500">Analyse IA en cours…</Text></HStack>
+                    ) : (
+                      <>
+                        <Text fontSize="sm" fontStyle="italic">💬 {conseil ?? plan.commentaire}</Text>
+                        {conseil && (
+                          <Text fontSize="xs" color="gray.500" mt="1">
+                            Conseil généré par IA, à titre indicatif.
+                          </Text>
+                        )}
+                      </>
+                    )}
                   </Box>
                 )}
 
@@ -133,7 +147,7 @@ export function PlanModal({ isOpen, onClose, idObjectif }: PlanModalProps) {
               <Button variant="ghost" mr="3" onClick={onClose}>Fermer</Button>
               <Button
                 colorScheme="brand"
-                onClick={() => idObjectif && generer(idObjectif)}
+                onClick={() => idObjectif && generer(idObjectif, { onSuccess: () => refetchConseil() })}
                 isLoading={isPending}
                 borderRadius="10px"
               >
